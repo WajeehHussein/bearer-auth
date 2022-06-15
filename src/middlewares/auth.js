@@ -1,7 +1,11 @@
 'use strict';
+require('dotenv').config();
+
 const base64 = require('base-64');
 const bcrypt = require('bcrypt');
 
+const jwt = require('jsonwebtoken')
+const SECRET = process.env.API_SECRET || "api srcret"
 
 module.exports = (Users) => async (req, res, next) => {
     // console.log(Users);
@@ -14,10 +18,12 @@ module.exports = (Users) => async (req, res, next) => {
         const user = await Users.findOne({ where: { username: username } });
         const valid = await bcrypt.compare(password, user.password);
         if (valid) {
+            let newToken = jwt.sign({ username: user.username }, SECRET, { expiresIn: '15m' })
+            user.token = newToken;
             req.user = user;
         }
         else {
-            throw new Error('Invalid User');
+            throw new Error('Invalid login');
         }
     } catch (error) { res.status(403).send('Invalid Login'); }
     next();
