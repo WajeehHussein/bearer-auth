@@ -7,16 +7,18 @@ const bcrypt = require('bcrypt');
 
 const { Users } = require('../models/index')
 const auth = require('../middlewares/auth')
+const bearer = require('../middlewares/bearer')
 
 
 usersRouter.get('/', home)
 usersRouter.post('/signup', signUp);
 usersRouter.post('/signin', auth(Users), signIn);
-
+usersRouter.get('/myorders', bearer, getOreders)
 
 function home(req, res) {
     res.send('home page')
 }
+
 
 async function signUp(req, res) {
     try {
@@ -31,5 +33,14 @@ async function signIn(req, res) {
     res.status(200).json(req.user);
 
 }
+
+function getOreders(req, res) {
+
+    res.json({
+        'message': 'You are authorized to view the user orders',
+        'user': req.user
+    });
+
+};
 
 module.exports = usersRouter;
